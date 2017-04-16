@@ -5,8 +5,50 @@
 int main(int argc, char* argv[]) {
     //ejer1();
     //ejer2();
-    ejer3();
+    //ejer3();
+    testAnd();
     return 1;
+}
+
+void testAnd() {
+    unsigned char *mem;
+    __m128i v1, v2, v3;
+    int i;
+    int cant = 16;
+    int res = 0;
+
+    if (posix_memalign((void*) &mem, 16, cant) != 0) {
+        perror("posix_memalign dio error");
+        exit(1);
+    }
+
+    for (i = 0; i < cant/2; i++) {
+        mem[i] = 0;
+    }
+    
+    for (i = cant/2; i < cant; i++) {
+        mem[i] = 1;
+    }
+
+    v3 = _mm_set1_epi8(0);
+    for (i = 0; i < cant / 16; i = i + 2) {
+        v1 = _mm_load_si128((__m128i*) (mem + i * 16));
+        //v2 = _mm_load_si128((__m128i*) (mem + (i + 1) * 16));
+        v3 = _mm_cmpeq_epi8(v1, v3);
+    }
+
+    _mm_store_si128((__m128i*) mem, v3);
+    
+    /*for (i = 0; i < 16; i++) {
+        res += mem[i];
+    }*/
+    
+    printf("%hhx", mem[0]);
+    for (i = 1; i < 16; i++) {
+        printf(", %hhx", mem[i]);
+    }
+    
+    //printf(" = %b", res);
 }
 
 void ejer1() {
